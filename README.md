@@ -1,2 +1,2 @@
 # detit
-Determinantal choice modeling
+Determinantal choice modeling for data-driven subset selection.
