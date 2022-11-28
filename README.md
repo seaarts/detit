@@ -1,0 +1,2 @@
+# detit
+Determinantal choice modeling
