@@ -1,5 +1,4 @@
 import pytest
-import numpy as np
 import tensorflow as tf
 from detit.models import Ensemble
 from detit.quality import Exponential
@@ -34,7 +33,7 @@ class TestEnsemble:
     def test_raises(self, qual, simi):
         """Verify value error raised if inputs are imporper."""
         with pytest.raises(ValueError):
-            ell = Ensemble(qual, simi)
+            Ensemble(qual, simi)
 
     @pytest.mark.parametrize(
         "pqual, psimi, xShape, zShape, expected",
