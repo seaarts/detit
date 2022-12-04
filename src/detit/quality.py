@@ -11,13 +11,16 @@ class Quality(ABC):
         self.name = name
 
     def __repr__(self):
+        """Return representative string."""
         return f"Quality({self.__dict__})"
 
     @abstractmethod
     def evaluate(self):
+        """Evaluate the quality model on given inputs."""
         pass
 
     def __call__(self, *args, **kwargs):
+        """Evaluate the quality model on given inputs."""
         return self.evaluate(*args, **kwargs)
 
 
@@ -29,7 +32,7 @@ class Exponential(Quality):
 
     def evaluate(self, beta, X):
         """
-        Evaluate an exponential half-quality model with coefficients `beta`,
+        Evaluate an exponential half-quality model with coefficients `beta`\
         and data `X`.
 
         Parameters
@@ -47,7 +50,6 @@ class Exponential(Quality):
         Q : [nChains, batchSize, nItems] tensor
             Returns a real-valued quality for each [chain, trial, item]-triple.
         """
-
         mu = tf.linalg.matmul(beta, X, transpose_b=True)
 
         Q = tf.math.exp(mu / 2)

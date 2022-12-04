@@ -6,10 +6,12 @@
 Welcome to detit's documentation!
 =================================
 
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
+	
+   detit
 
 
 Indices and tables

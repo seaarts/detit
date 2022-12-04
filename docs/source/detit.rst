@@ -1,19 +1,25 @@
 detit package
 =============
 
-Submodules
-----------
 
-detit.scratchpad module
------------------------
+detit.models
+------------
 
-.. automodule:: detit.scratchpad
+.. automodule:: detit.models
    :members:
    :undoc-members:
    :show-inheritance:
 
-detit.similarity module
------------------------
+detit.quality
+-------------
+
+.. automodule:: detit.quality
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+detit.similarity
+----------------
 
 .. automodule:: detit.similarity
    :members:

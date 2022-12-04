@@ -11,13 +11,19 @@ class Similarity(ABC):
         self.name = name
 
     def __repr__(self):
+        """Return representative string."""
         return f"Similarity({self.__dict__})"
 
     @abstractmethod
     def evaluate(self):
+        """Evaluate the model on given input.
+
+        All similarity models are assumed to take a data tensor as input.
+        """
         pass
 
     def __call__(self, *args, **kwargs):
+        """Call the evaluate function."""
         return self.evaluate(*args, **kwargs)
 
 
@@ -47,7 +53,6 @@ class RBF(Similarity):
         S : ``tf.tensor`` of shape ``[nChains, batchSize, nItems, nItems]``
             A tensor of Similarity kernel matrices.
         """
-
         lengthscale = 2 * tf.math.exp(lengthscale * 2)  # 2 * ell^2
 
         # line up dimensions with data
