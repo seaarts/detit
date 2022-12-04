@@ -11,7 +11,7 @@ class TestRBF:
 
     def test_repr(self):
         rbf = simi.RBF()
-        assert rbf.__repr__() == rbf.name
+        assert rbf.__repr__() == "Similarity({'name': 'RBF'})"
 
     @pytest.mark.parametrize(
         "lsShape, datShape, expShape",
@@ -45,3 +45,20 @@ class TestRBF:
         out = tf.ones(shape=expShape, dtype=tf.double) * (np.e ** (-datShape[-1] / 2))
 
         assert np.allclose(rbf.evaluate(ls, dat).numpy(), out.numpy())
+
+    @pytest.mark.parametrize(
+        "lsShape, datShape, expShape",
+        [
+            ((1), (3, 3, 1), (1, 3, 3)),
+            ((1), (1, 3, 3, 1), (1, 1, 3, 3)),
+            ((2, 1), (3, 3, 1), (2, 1, 3, 3)),
+            ((5, 2), (4, 3, 3, 2), (5, 4, 3, 3)),
+        ],
+    )
+    def test_call(self, lsShape, datShape, expShape):
+        rbf = simi.RBF()
+        ls = tf.zeros(shape=lsShape, dtype=tf.double)
+        dat = tf.ones(shape=datShape, dtype=tf.double)
+        out = tf.ones(shape=expShape, dtype=tf.double) * (np.e ** (-datShape[-1] / 2))
+
+        assert np.allclose(rbf(ls, dat).numpy(), out.numpy())

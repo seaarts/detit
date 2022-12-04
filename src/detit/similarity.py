@@ -10,9 +10,15 @@ class Similarity(ABC):
     def __init__(self, name):
         self.name = name
 
+    def __repr__(self):
+        return f"Similarity({self.__dict__})"
+
     @abstractmethod
     def evaluate(self):
         pass
+
+    def __call__(self, *args, **kwargs):
+        return self.evaluate(*args, **kwargs)
 
 
 class RBF(Similarity):
@@ -20,9 +26,6 @@ class RBF(Similarity):
 
     def __init__(self):
         super().__init__(name="RBF")
-
-    def __repr__(self):
-        return self.name
 
     def evaluate(self, lengthscale, data):
         """
