@@ -1,4 +1,4 @@
-detit package
+Documentation
 =============
 
 
@@ -26,10 +26,11 @@ detit.similarity
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+detit.data
+----------
 
-.. automodule:: detit
+.. automodule:: detit.data
    :members:
    :undoc-members:
    :show-inheritance:
+

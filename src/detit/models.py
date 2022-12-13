@@ -1,6 +1,7 @@
 """A module for L-ensembles and likelihood functions."""
 
 import tensorflow as tf
+import numpy as np
 from detit.quality import Quality
 from detit.similarity import Similarity
 
@@ -51,21 +52,22 @@ class Ensemble:
         """Call evaluate function."""
         return self.evaluate(paramsQual, paramsSimi, X, Z)
 
-    def log_det(self, beta, lengthscale, element, eye=False):
+    def logdet(self, beta, lengthscale, element, eye=False):
         """
         Evaluate the log-determinant of the L-ensemble.
 
         Parameters
         ----------
-        params_qual : [nChains, nDims] tensor
-            Coefficient vector(s) for the quality model.
+        beta : [nChains, nDims] tensor
+            Parameters vector(s) for the quality model.
         lengthscale : [nChains, nDims] tensor
-            Lengthscale vector(s). Supports `nChains` parallel chains.
-        element : list, from tf.dataset
-            The dataset is assumet to have 3 components:
+            Lengthscale vector(s) for similarity model.
+        element : list, from tf.dataset object.
+            The dataset is assumed to have 3 components:
             element[0] : int, number of items
             element[1] : tensor, quality data
             element[2] : tensor, similarity data
+            The tensors are expected to have a batch dimension.
         eye : Bool, optional
             Optional boolean for whether to add an identity tensor to\
             the L-ensemble prior to taking the log det. Used for DPP\
@@ -76,14 +78,40 @@ class Ensemble:
         log_det : tf.double
             The log-determinant of L-ensemble evaluated on `element`.
         """
-        pass
+        L = self(beta, lengthscale, element[1], element[2])
 
-        # READ about tf parameter and or data objects
+        if eye:
+            chains, N, n = L.shape[:3]
+            L += tf.eye(num_rows=n, batch_shape=[chains, N], dtype=L.dtype)
 
-        # L = self(beta, lengthscale, element[1], element[2])
+        return tf.math.reduce_sum(tf.linalg.logdet(L), axis=1)
 
-        # if eye:
-        # chains, N, n =  L.shape[:3]
-        # L += tf.eye(num_rows=n, batch_shape=[chains, N], dtype=L.dtype)
+    def log_likelihood(self, beta, lengthscale, dataset_succ, dataset_full):
+        """
+        Evaluate log-likelihood of DPP model.
 
-        # return tf.math.reduce_sum(tf.linalg.logdet(L), axis=1)
+        Parameters
+        ----------
+        beta : tf.tensor
+            Parameter tensor for quality model.
+        lengthsscale : tf.tensor
+            Parametere rensor for similarity model.
+        dataset_succ : tf.Dataset
+            Dataset of 1-labeled observations.
+            Should contain (nItems, X, Z).
+        dataset_full : tf.Dataset
+            Dataset of all observations.
+        """
+        loglik = tf.constant(np.zeros(beta.shape[0]))
+
+        # add denominator components
+        for element in dataset_full:
+            loglik -= self.logdet(beta, lengthscale, element, eye=True)
+
+        # add numerator components
+        if not dataset_succ:
+            return loglik
+        for element in dataset_succ:
+            loglik += self.logdet(beta, lengthscale, element, eye=False)
+
+        return loglik
