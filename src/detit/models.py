@@ -77,6 +77,13 @@ class Ensemble:
         -------
         log_det : tf.double
             The log-determinant of L-ensemble evaluated on `element`.
+
+        Notes
+        -----
+        We need to pass the number of items (``element[0]``) to the function
+        explicitly, as ``tensorflow`` will not always explicitly form the tensors,
+        so their shape mid-run may evaluate to ``None``. This would raise an error.
+        To remedy this size information about the tensors is passed explicitly.
         """
         L = self(beta, lengthscale, element[1], element[2])
 
@@ -115,3 +122,53 @@ class Ensemble:
             loglik += self.logdet(beta, lengthscale, element, eye=False)
 
         return loglik
+
+    def likelihoodClosure(self, dataset, nDimsQual, prior=None):
+        """
+        Returns a functional closure of the log-likelihood.
+
+        This creates a simple *functional closure* of the log-likelihood. The
+        main purpose is to attach a dataset to the function, and to make the
+        input accept a single parameter tensor, rather than two separate ones
+        for the quality and similarity models, respectively. The closure can
+        then be passed to e.g. a minimizer or Bayesian inference function.
+
+        Parameters
+        ----------
+        dataset : detit.data.Dataset
+            A batched dataset of successes and full observations.
+        nDimsQual : int
+            The parameter dimension of the quality model.
+        prior : optional, tensorflow.probablity.distribution-object
+            A prior tfp.distribution with ``event_shape`` equal to ``nDimsQual +
+            nDimsSimi``.
+
+        Returns
+        -------
+        log_prob : function
+            A function that takes parameters and returns a log-likelihood at
+            of the given parameters and dataset.
+        """
+        if not prior:
+
+            def _log_prob(params):
+                loglik = self.log_likelihood(
+                    params[:, :nDimsQual],
+                    params[:, nDimsQual:],
+                    dataset.succ,
+                    dataset.full,
+                )
+                return loglik
+
+        else:
+
+            def _log_prob(params):
+                loglik = self.log_likelihood(
+                    params[:, :nDimsQual],
+                    params[:, nDimsQual:],
+                    dataset.succ,
+                    dataset.full,
+                )
+                return loglik + prior.log_prob(params)
+
+        return _log_prob

@@ -142,7 +142,6 @@ class TestEnsemble:
         beta and the number of items, dimensions, and observations to
         induce variation in the testing examples.
         """
-
         ensemble = makeEnsemble
 
         ds = dtd.Dataset.fromNumpy(labels, Xs, Zs)
@@ -150,3 +149,43 @@ class TestEnsemble:
         loglik = ensemble.log_likelihood(beta, ell, ds.succ, ds.full)
 
         assert np.allclose(loglik.numpy()[0], expected)
+
+    @pytest.mark.parametrize(
+        "params, labels, Xs, Zs, prior, expected",
+        [
+            (
+                np.ones(shape=(1, 2)),
+                [np.array([True])],
+                [np.ones(shape=(1, 1))],
+                [np.zeros(shape=(1, 1, 1))],
+                None,
+                1 - np.log(1 + np.e),
+            ),
+            (
+                np.ones(shape=(1, 2)),
+                [np.array([False])],
+                [np.ones(shape=(1, 1))],
+                [np.zeros(shape=(1, 1, 1))],
+                None,
+                np.log(1) - np.log(1 + np.e),
+            ),
+            (
+                np.ones(shape=(1, 2)),
+                [np.array([True]), np.array([True])],
+                [np.ones(shape=(1, 1)), np.ones(shape=(1, 1))],
+                [np.zeros(shape=(1, 1, 1)), np.zeros(shape=(1, 1, 1))],
+                None,
+                2 * (1 - np.log(1 + np.e)),
+            ),
+        ],
+    )
+    def test_likeligoodClosure(
+        self, params, labels, Xs, Zs, prior, expected, makeEnsemble
+    ):
+        ensemble = makeEnsemble
+
+        ds = dtd.Dataset.fromNumpy(labels, Xs, Zs)
+
+        loglik = ensemble.likelihoodClosure(ds, 1, prior=prior)
+
+        assert np.allclose(loglik(params).numpy()[0], expected)

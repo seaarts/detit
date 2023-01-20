@@ -130,3 +130,7 @@ dmypy.json
 
 # vs-code
 .vscode/
+
+# simulation output
+simulations/plots/*
+simulations/data/*
